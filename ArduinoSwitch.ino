@@ -4,31 +4,40 @@
 #define houseCode "00111"
 #define socketCount 4
 char* socketCodes[] = {"10000", "0", "00100", "0"}; //0:A 1:B 2:C 3:D
-int sockets[4][2] = {{6, -1}, {-1, -1}, {2, -1}, {-1, -1}}; //first: pin for switch for that socket, second: previous state(HIGH/LOW)
+int socketPins[4][2] = {{2,3}, {4,7}, {5,6}, {8,9}};
 
 RCSwitch mySwitch = RCSwitch();
 
 void setup() {
+  Serial.begin(9600);
   mySwitch.enableTransmit(9);
   pinMode(led, OUTPUT);
-  for(int i = 0; i < socketCount; i++) {
-    pinMode(sockets[i][0], INPUT);
+  for(int i = 2; i <= 9; i++) {
+    pinMode(i, INPUT);
   }
 }
 
 void loop() {
-  for(int i = 0; i < socketCount; i++) {
-    if (sockets[i][0] == -1) {
-      //undefined -> ignore
-      continue;  
+  //every socket
+  for(int i = 0; i < 4; i++) {
+    int firstPin = 0;
+    int secondPin = 0;
+    for(int j = 0; j < 4; j++) {
+      firstPin += digitalRead(socketPins[i][0]) == HIGH ? 1 : 0;
+      secondPin += digitalRead(socketPins[i][1]) == HIGH ? 1 : 0;
+      delay(95);
     }
-    int state = digitalRead(sockets[i][0]);
-    if (sockets[i][1] != state) {
-      bl(led, 100);
-      sendSwitch(i, state == HIGH ? true : false);
-      sockets[i][1] = state;
-    }
+    /*String so = "#";
+    String f = "F:";
+    String s = ";S:";
+    String semi = ";";
+    String output = so + i + semi + f + firstPin + s + secondPin + semi;
+    Serial.print(output);*/
+    String y = "+";
+    String n = "-";
+    Serial.print(firstPin > secondPin ? y : n);
   }
+  Serial.println();
 }
 
 //blink
